@@ -1,0 +1,278 @@
+{
+  "id" : null,
+  "name" : "Heroku",
+  "description" : "This content pack spawns a TCP input on port 11003 with parsers that extract all request information and timings out of Heroku logs.",
+  "category" : "SaaS",
+  "inputs" : [ {
+    "title" : "Heroku",
+    "configuration" : {
+      "recv_buffer_size" : 1048576,
+      "port" : 11003,
+      "tls_key_password" : "",
+      "tls_key_file" : "",
+      "tls_client_auth_cert_file" : "",
+      "max_message_size" : 2097152,
+      "tls_client_auth" : "disabled",
+      "override_source" : "",
+      "bind_address" : "0.0.0.0",
+      "tls_cert_file" : ""
+    },
+    "type" : "org.graylog2.inputs.raw.tcp.RawTCPInput",
+    "global" : false,
+    "extractors" : [ {
+      "title" : "Level/Severity",
+      "type" : "REGEX",
+      "configuration" : {
+        "regex_value" : "\\d <(.+)>"
+      },
+      "converters" : [ {
+        "type" : "SYSLOG_PRI_LEVEL",
+        "configuration" : { }
+      } ],
+      "order" : 0,
+      "cursor_strategy" : "COPY",
+      "target_field" : "level",
+      "source_field" : "message",
+      "condition_type" : "NONE",
+      "condition_value" : ""
+    }, {
+      "title" : "Facility",
+      "type" : "REGEX",
+      "configuration" : {
+        "regex_value" : "\\d <(.+)>"
+      },
+      "converters" : [ {
+        "type" : "SYSLOG_PRI_FACILITY",
+        "configuration" : { }
+      } ],
+      "order" : 0,
+      "cursor_strategy" : "COPY",
+      "target_field" : "facility",
+      "source_field" : "message",
+      "condition_type" : "NONE",
+      "condition_value" : ""
+    }, {
+      "title" : "Timestamp",
+      "type" : "REGEX",
+      "configuration" : {
+        "regex_value" : ">1 (\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}.\\d+\\+\\d{2}:\\d{2}).+"
+      },
+      "converters" : [ {
+        "type" : "DATE",
+        "configuration" : {
+          "date_format" : "yyyy-MM-dd'T'HH:mm:ss.SSSSSSZZ"
+        }
+      } ],
+      "order" : 0,
+      "cursor_strategy" : "COPY",
+      "target_field" : "timestamp",
+      "source_field" : "message",
+      "condition_type" : "NONE",
+      "condition_value" : ""
+    }, {
+      "title" : "Drain ID",
+      "type" : "REGEX",
+      "configuration" : {
+        "regex_value" : "(d\\..+?) "
+      },
+      "converters" : [ ],
+      "order" : 0,
+      "cursor_strategy" : "COPY",
+      "target_field" : "drain_id",
+      "source_field" : "message",
+      "condition_type" : "NONE",
+      "condition_value" : ""
+    }, {
+      "title" : "Heroku source type",
+      "type" : "SPLIT_AND_INDEX",
+      "configuration" : {
+        "index" : 5,
+        "split_by" : " "
+      },
+      "converters" : [ ],
+      "order" : 0,
+      "cursor_strategy" : "COPY",
+      "target_field" : "heroku_source_type",
+      "source_field" : "message",
+      "condition_type" : "NONE",
+      "condition_value" : ""
+    }, {
+      "title" : "Component",
+      "type" : "SPLIT_AND_INDEX",
+      "configuration" : {
+        "index" : 6,
+        "split_by" : " "
+      },
+      "converters" : [ ],
+      "order" : 0,
+      "cursor_strategy" : "COPY",
+      "target_field" : "heroku_component",
+      "source_field" : "message",
+      "condition_type" : "NONE",
+      "condition_value" : ""
+    }, {
+      "title" : "Message",
+      "type" : "REGEX",
+      "configuration" : {
+        "regex_value" : "- - (.+)"
+      },
+      "converters" : [ ],
+      "order" : 0,
+      "cursor_strategy" : "CUT",
+      "target_field" : "message",
+      "source_field" : "message",
+      "condition_type" : "NONE",
+      "condition_value" : ""
+    }, {
+      "title" : "HTTP method",
+      "type" : "REGEX",
+      "configuration" : {
+        "regex_value" : "method=(.+?)(\\s|$)"
+      },
+      "converters" : [ {
+        "type" : "LOWERCASE",
+        "configuration" : { }
+      } ],
+      "order" : 0,
+      "cursor_strategy" : "COPY",
+      "target_field" : "http_method",
+      "source_field" : "message",
+      "condition_type" : "STRING",
+      "condition_value" : "method="
+    }, {
+      "title" : "Path",
+      "type" : "REGEX",
+      "configuration" : {
+        "regex_value" : "path=(.+?)(\\s|$)"
+      },
+      "converters" : [ ],
+      "order" : 0,
+      "cursor_strategy" : "COPY",
+      "target_field" : "path",
+      "source_field" : "message",
+      "condition_type" : "STRING",
+      "condition_value" : "path="
+    }, {
+      "title" : "Request ID",
+      "type" : "REGEX",
+      "configuration" : {
+        "regex_value" : "request_id=(.+?)(\\s|$)"
+      },
+      "converters" : [ ],
+      "order" : 0,
+      "cursor_strategy" : "COPY",
+      "target_field" : "request_id",
+      "source_field" : "message",
+      "condition_type" : "STRING",
+      "condition_value" : "request_id="
+    }, {
+      "title" : "Client IP",
+      "type" : "REGEX",
+      "configuration" : {
+        "regex_value" : "fwd=\"*(.+?)\"*(\\s|$)"
+      },
+      "converters" : [ ],
+      "order" : 0,
+      "cursor_strategy" : "COPY",
+      "target_field" : "client_ip",
+      "source_field" : "message",
+      "condition_type" : "STRING",
+      "condition_value" : "fwd="
+    }, {
+      "title" : "Dyno",
+      "type" : "REGEX",
+      "configuration" : {
+        "regex_value" : "dyno=(.+?)(\\s|$)"
+      },
+      "converters" : [ ],
+      "order" : 0,
+      "cursor_strategy" : "COPY",
+      "target_field" : "dyno",
+      "source_field" : "message",
+      "condition_type" : "STRING",
+      "condition_value" : "dyno="
+    }, {
+      "title" : "Connect time millis",
+      "type" : "REGEX",
+      "configuration" : {
+        "regex_value" : "connect=(.+?)ms(\\s|$)"
+      },
+      "converters" : [ {
+        "type" : "NUMERIC",
+        "configuration" : { }
+      } ],
+      "order" : 0,
+      "cursor_strategy" : "COPY",
+      "target_field" : "connect_time_ms",
+      "source_field" : "message",
+      "condition_type" : "STRING",
+      "condition_value" : "connect="
+    }, {
+      "title" : "Service time millis",
+      "type" : "REGEX",
+      "configuration" : {
+        "regex_value" : "service=(.+?)ms(\\s|$)"
+      },
+      "converters" : [ {
+        "type" : "NUMERIC",
+        "configuration" : { }
+      } ],
+      "order" : 0,
+      "cursor_strategy" : "COPY",
+      "target_field" : "service_time_ms",
+      "source_field" : "message",
+      "condition_type" : "STRING",
+      "condition_value" : "service="
+    }, {
+      "title" : "HTTP status",
+      "type" : "REGEX",
+      "configuration" : {
+        "regex_value" : "status=(.+?)(\\s|$)"
+      },
+      "converters" : [ {
+        "type" : "NUMERIC",
+        "configuration" : { }
+      } ],
+      "order" : 0,
+      "cursor_strategy" : "COPY",
+      "target_field" : "http_status",
+      "source_field" : "message",
+      "condition_type" : "STRING",
+      "condition_value" : "status="
+    }, {
+      "title" : "Bytes",
+      "type" : "REGEX",
+      "configuration" : {
+        "regex_value" : "bytes=(.+?)(\\s|$)"
+      },
+      "converters" : [ {
+        "type" : "NUMERIC",
+        "configuration" : { }
+      } ],
+      "order" : 0,
+      "cursor_strategy" : "COPY",
+      "target_field" : "bytes",
+      "source_field" : "message",
+      "condition_type" : "STRING",
+      "condition_value" : "bytes="
+    }, {
+      "title" : "Source",
+      "type" : "REGEX",
+      "configuration" : {
+        "regex_value" : "host=(.+?)(\\s|$)"
+      },
+      "converters" : [ ],
+      "order" : 0,
+      "cursor_strategy" : "COPY",
+      "target_field" : "source",
+      "source_field" : "message",
+      "condition_type" : "STRING",
+      "condition_value" : "host="
+    } ],
+    "static_fields" : { }
+  } ],
+  "streams" : [ ],
+  "outputs" : [ ],
+  "dashboards" : [ ],
+  "grok_patterns" : [ ]
+}
